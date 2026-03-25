@@ -7,9 +7,11 @@ import {
   CalendarClock,
   ChevronDown,
   ClipboardCheck,
+  Menu,
   Pill,
   ShieldCheck,
   Star,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -158,8 +160,118 @@ const theme2Streams = [
   "https://stream.mux.com/6yvj9SR5bjmXq9N3ak7gy427RwUs8R2ZoH4ndA7Q1018.m3u8",
 ];
 
+function MobileNavDrawer({
+  open,
+  onClose,
+  activeTheme,
+  onThemeChange,
+}: {
+  open: boolean;
+  onClose: () => void;
+  activeTheme: Theme;
+  onThemeChange: (t: Theme) => void;
+}) {
+  if (!open) return null;
+  const row =
+    "flex min-h-[3rem] items-center border-b border-zinc-100 px-1 text-base font-medium text-zinc-900 active:bg-zinc-50 touch-manipulation";
+  return (
+    <div
+      id="mobile-menu"
+      className="fixed inset-0 z-[200] md:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site menu"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/50 touch-manipulation"
+        onClick={onClose}
+        aria-label="Close menu overlay"
+      />
+      <div className="absolute right-0 top-0 flex h-full w-[min(100%,20.5rem)] flex-col bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <span className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+            Smart Hospitals
+          </span>
+          <button
+            type="button"
+            className="rounded-lg p-2.5 touch-manipulation hover:bg-zinc-100"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-2">
+          <a href="#services" className={row} onClick={onClose}>
+            Services
+          </a>
+          <a href="#features" className={row} onClick={onClose}>
+            Features
+          </a>
+          <a href="#doctors" className={row} onClick={onClose}>
+            Doctors
+          </a>
+          <a href="#faq" className={row} onClick={onClose}>
+            FAQ
+          </a>
+          <a href="#contact" className={row} onClick={onClose}>
+            Contact
+          </a>
+          <Link href="/quotation" className={row} onClick={onClose}>
+            Pricing
+          </Link>
+          <Link href="/crm" className={row} onClick={onClose}>
+            CRM
+          </Link>
+        </nav>
+        <div className="border-t bg-zinc-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Presentation
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(["theme1", "theme2", "theme3"] as const).map((t) => (
+              <Button
+                key={t}
+                type="button"
+                size="sm"
+                variant={activeTheme === t ? "default" : "outline"}
+                className="touch-manipulation"
+                onClick={() => {
+                  onThemeChange(t);
+                  onClose();
+                }}
+              >
+                {t === "theme1" ? "T1" : t === "theme2" ? "T2" : "T3"}
+              </Button>
+            ))}
+          </div>
+          <Link
+            href="#contact"
+            onClick={onClose}
+            className={cn(
+              buttonVariants({ variant: "default", size: "lg" }),
+              "mt-4 flex h-12 w-full touch-manipulation items-center justify-center"
+            )}
+          >
+            Book Appointment
+          </Link>
+          <a
+            href="tel:+919876543210"
+            className="mt-3 flex h-12 items-center justify-center text-sm font-semibold text-zinc-800 touch-manipulation"
+            onClick={onClose}
+          >
+            Call Now
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [theme, setTheme] = useState<Theme>("theme1");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState("");
   const patientCount = useMemo(() => 34000 + new Date().getDate() * 27, []);
   const content = themeContent[theme];
@@ -185,6 +297,20 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", nextTheme);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mobileMenuOpen]);
+
   const onThemeChange = (next: Theme) => {
     setTheme(next);
     document.documentElement.setAttribute("data-theme", next);
@@ -207,38 +333,93 @@ export default function Home() {
 
   return (
     <div className="bg-white text-zinc-900">
+      <MobileNavDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        activeTheme={theme}
+        onThemeChange={onThemeChange}
+      />
+
       {theme !== "theme3" ? (
-      <header className="sticky top-0 z-50 border-b border-zinc-200/60 bg-white/95 backdrop-blur">
-        <div className="container-xl flex h-16 items-center justify-between">
-          <div className="text-lg font-semibold tracking-tight">Smart Hospitals</div>
-          <nav className="hidden md:flex gap-6 text-sm">
-            <a href="#services">Services</a>
-            <a href="#features">Features</a>
-            <a href="#doctors">Doctors</a>
-            <a href="#faq">FAQ</a>
-          </nav>
-          <div className="flex gap-2">
-            <Button onClick={() => onThemeChange("theme1")} size="sm" variant="outline">T1</Button>
-            <Button onClick={() => onThemeChange("theme2")} size="sm" variant="outline">T2</Button>
-            <Button onClick={() => onThemeChange("theme3")} size="sm" variant="outline">T3</Button>
-            <Link
-              href="#contact"
-              className={cn(buttonVariants({ variant: "default", size: "default" }))}
+        <header className="sticky top-0 z-40 border-b border-zinc-200/60 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+          <div className="container-xl flex min-h-14 items-center justify-between gap-3 py-2 sm:min-h-16 sm:py-0">
+            <div className="min-w-0 shrink text-base font-semibold tracking-tight sm:text-lg">
+              Smart Hospitals
+            </div>
+            <nav className="hidden items-center gap-6 text-sm md:flex">
+              <a className="hover:text-zinc-600" href="#services">
+                Services
+              </a>
+              <a className="hover:text-zinc-600" href="#features">
+                Features
+              </a>
+              <a className="hover:text-zinc-600" href="#doctors">
+                Doctors
+              </a>
+              <a className="hover:text-zinc-600" href="#faq">
+                FAQ
+              </a>
+            </nav>
+            <div className="hidden items-center gap-2 md:flex">
+              <Button
+                onClick={() => onThemeChange("theme1")}
+                size="sm"
+                variant="outline"
+                type="button"
+              >
+                T1
+              </Button>
+              <Button
+                onClick={() => onThemeChange("theme2")}
+                size="sm"
+                variant="outline"
+                type="button"
+              >
+                T2
+              </Button>
+              <Button
+                onClick={() => onThemeChange("theme3")}
+                size="sm"
+                variant="outline"
+                type="button"
+              >
+                T3
+              </Button>
+              <Link
+                href="#contact"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "default" }),
+                  "whitespace-nowrap"
+                )}
+              >
+                Book Appointment
+              </Link>
+            </div>
+            <button
+              type="button"
+              className="inline-flex touch-manipulation items-center justify-center rounded-lg p-2.5 hover:bg-zinc-100 md:hidden"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              aria-label="Open menu"
             >
-              Book Appointment
-            </Link>
+              <Menu className="h-6 w-6" />
+            </button>
           </div>
-        </div>
-      </header>
+        </header>
       ) : null}
 
       {theme === "theme1" && <ThemeOneHero />}
       {theme === "theme2" && <ThemeTwoHero patientCount={patientCount} />}
       {theme === "theme3" && (
-        <ThemeThreeHero active={theme} onThemeChange={onThemeChange} />
+        <ThemeThreeHero
+          active={theme}
+          onThemeChange={onThemeChange}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
+        />
       )}
 
-      <section className={`container-xl py-10`}>
+      <section className={`container-xl py-8 sm:py-10`}>
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {content.emergency}
         </div>
@@ -252,7 +433,7 @@ export default function Home() {
       </section>
 
       <section
-        className={`container-xl py-12 ${
+        className={`container-xl py-8 sm:py-12 ${
           theme === "theme1"
             ? "max-w-[920px]"
             : theme === "theme2"
@@ -262,12 +443,12 @@ export default function Home() {
         id="services"
       >
         <h2
-          className={`font-semibold ${
+          className={`font-semibold tracking-tight ${
             theme === "theme1"
-              ? "text-4xl tracking-tight"
+              ? "text-3xl sm:text-4xl"
               : theme === "theme2"
-                ? "text-3xl font-[var(--font-poppins)]"
-                : "text-4xl"
+                ? "text-2xl font-[var(--font-poppins)] sm:text-3xl"
+                : "text-3xl sm:text-4xl"
           }`}
         >
           {content.servicesTitle}
@@ -308,14 +489,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container-xl py-12" id="features">
+      <section className="container-xl py-8 sm:py-12" id="features">
         <h2
-          className={`font-semibold ${
+          className={`font-semibold tracking-tight ${
             theme === "theme1"
-              ? "text-4xl tracking-tight"
+              ? "text-3xl sm:text-4xl"
               : theme === "theme2"
-                ? "text-3xl font-[var(--font-poppins)]"
-                : "text-4xl"
+                ? "text-2xl font-[var(--font-poppins)] sm:text-3xl"
+                : "text-3xl sm:text-4xl"
           }`}
         >
           {content.featuresTitle}
@@ -400,8 +581,10 @@ export default function Home() {
         </ul>
       </section>
 
-      <section className="container-xl py-12" id="doctors">
-        <h2 className="text-3xl font-semibold">{content.doctorsTitle}</h2>
+      <section className="container-xl py-8 sm:py-12" id="doctors">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {content.doctorsTitle}
+        </h2>
         <div
           className={`mt-6 grid gap-4 ${
             theme === "theme3" ? "md:grid-cols-3" : "md:grid-cols-3"
@@ -420,8 +603,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container-xl py-12">
-        <h2 className="text-3xl font-semibold">{content.testimonialTitle}</h2>
+      <section className="container-xl py-8 sm:py-12">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {content.testimonialTitle}
+        </h2>
         <div
           className={`mt-6 grid gap-4 ${
             theme === "theme1"
@@ -444,8 +629,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container-xl py-12">
-        <h2 className="text-3xl font-semibold">{content.galleryTitle}</h2>
+      <section className="container-xl py-8 sm:py-12">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {content.galleryTitle}
+        </h2>
         <div
           className={`mt-6 grid gap-4 ${
             theme === "theme1"
@@ -468,8 +655,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container-xl py-12" id="faq">
-        <h2 className="text-3xl font-semibold">FAQ</h2>
+      <section className="container-xl py-8 sm:py-12" id="faq">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">FAQ</h2>
         <div
           className={`mt-6 ${
             theme === "theme2"
@@ -485,25 +672,58 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container-xl py-12" id="contact">
-        <h2 className="text-3xl font-semibold">{content.contactTitle}</h2>
-        <form className="mt-6 grid gap-3 md:max-w-xl" onSubmit={submitLead}>
-          <input className="rounded-lg border p-3" name="name" placeholder="Hospital contact person" required />
-          <input className="rounded-lg border p-3" name="phone" placeholder="Phone number" required />
-          <input className="rounded-lg border p-3" name="email" placeholder="Email (optional)" />
-          <textarea className="rounded-lg border p-3" name="notes" placeholder="Tell us your requirement" />
-          <Button type="submit">Book Appointment</Button>
+      <section className="container-xl py-8 sm:py-12" id="contact">
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {content.contactTitle}
+        </h2>
+        <form className="mt-6 grid max-w-full gap-3 sm:max-w-xl" onSubmit={submitLead}>
+          <input
+            className="min-h-12 rounded-lg border px-3 py-3 text-base"
+            name="name"
+            placeholder="Hospital contact person"
+            required
+          />
+          <input
+            className="min-h-12 rounded-lg border px-3 py-3 text-base"
+            name="phone"
+            placeholder="Phone number"
+            inputMode="tel"
+            autoComplete="tel"
+            required
+          />
+          <input
+            className="min-h-12 rounded-lg border px-3 py-3 text-base"
+            name="email"
+            placeholder="Email (optional)"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+          />
+          <textarea
+            className="min-h-[7.5rem] rounded-lg border px-3 py-3 text-base"
+            name="notes"
+            placeholder="Tell us your requirement"
+          />
+          <Button type="submit" className="h-12 touch-manipulation sm:h-11">
+            Book Appointment
+          </Button>
           <p className="text-sm text-zinc-600">{formStatus}</p>
         </form>
       </section>
 
-      <footer className="mt-12 border-t py-10">
-        <div className="container-xl flex flex-col gap-2 text-sm text-zinc-600">
+      <footer className="mt-12 border-t py-8 sm:py-10">
+        <div className="container-xl flex flex-col gap-3 text-sm text-zinc-600">
           <p>{content.footerLine}</p>
-          <div className="flex gap-4">
-            <Link href="/quotation">Quotation</Link>
-            <Link href="/crm">CRM</Link>
-            <Link href="/admin">Admin</Link>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link href="/quotation" className="touch-manipulation">
+              Quotation
+            </Link>
+            <Link href="/crm" className="touch-manipulation">
+              CRM
+            </Link>
+            <Link href="/admin" className="touch-manipulation">
+              Admin
+            </Link>
           </div>
         </div>
       </footer>
@@ -513,28 +733,56 @@ export default function Home() {
 
 function ThemeOneHero() {
   return (
-    <section className="relative min-h-screen overflow-hidden">
-      <video autoPlay loop muted playsInline className="w-full h-full object-cover [transform:scaleY(-1)] absolute inset-0">
+    <section className="relative min-h-[100svh] overflow-hidden">
+      <video autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover [transform:scaleY(-1)]">
         <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260302_085640_276ea93b-d7da-4418-a09b-2aa5b490e838.mp4" />
       </video>
       <div className="absolute inset-0 bg-gradient-to-b from-[26.416%] from-[rgba(255,255,255,0)] to-[66.943%] to-white" />
-      <div className="relative container-xl pt-[290px] pb-24 flex flex-col gap-8">
-        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-[48px] md:text-[80px] leading-[1.05] tracking-[-0.04em] font-medium max-w-4xl">
-          Simple patient <span className="font-serif italic text-[64px] md:text-[100px]">management</span> for modern hospitals
+      <div className="container-xl relative flex min-h-[100svh] flex-col gap-6 pb-16 pt-24 sm:gap-8 sm:pb-24 sm:pt-32 md:pt-40 lg:pt-[290px]">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl text-[clamp(1.75rem,6vw+0.35rem,5rem)] font-medium leading-[1.06] tracking-[-0.04em]"
+        >
+          Simple patient{" "}
+          <span className="font-serif italic text-[clamp(2rem,7vw+0.25rem,6.25rem)] leading-[1.02]">
+            management
+          </span>{" "}
+          for modern hospitals
         </motion.h1>
-        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="max-w-[554px] text-[18px] text-[#373a46]/80">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="max-w-[554px] text-base leading-relaxed text-[#373a46]/80 sm:text-[18px]"
+        >
           Build trust, capture leads, and organize daily care operations from one premium hospital platform.
         </motion.p>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="max-w-xl">
-          <div className="rounded-[40px] bg-[#fcfcfc] p-2 pl-4 border shadow-[0px_10px_40px_5px_rgba(194,194,194,0.25)] flex items-center gap-2">
-            <input className="flex-1 outline-none bg-transparent" placeholder="Enter phone number" />
-            <button className="rounded-[30px] px-6 py-3 text-white bg-gradient-to-b from-zinc-700 to-zinc-900 shadow-[inset_-4px_-6px_25px_0px_rgba(201,201,201,0.08),inset_4px_4px_10px_0px_rgba(29,29,29,0.24)]">Start Digital Setup</button>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="max-w-xl"
+        >
+          <div className="flex flex-col gap-2 rounded-[28px] border bg-[#fcfcfc] p-3 shadow-[0px_10px_40px_5px_rgba(194,194,194,0.25)] sm:flex-row sm:items-center sm:gap-2 sm:rounded-[40px] sm:p-2 sm:pl-4">
+            <input
+              className="min-h-12 w-full flex-1 rounded-2xl border-0 bg-transparent px-2 text-base outline-none sm:min-h-0 sm:rounded-none"
+              placeholder="Enter phone number"
+              inputMode="tel"
+              autoComplete="tel"
+            />
+            <button
+              type="button"
+              className="min-h-12 w-full touch-manipulation rounded-[24px] bg-gradient-to-b from-zinc-700 to-zinc-900 px-6 py-3 text-sm font-medium text-white shadow-[inset_-4px_-6px_25px_0px_rgba(201,201,201,0.08),inset_4px_4px_10px_0px_rgba(29,29,29,0.24)] sm:w-auto sm:rounded-[30px] sm:text-base"
+            >
+              Start Digital Setup
+            </button>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-sm">
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
             <span>500+ Hospitals Trust Our System</span>
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
+            <Star className="h-4 w-4 shrink-0 fill-current" />
+            <Star className="h-4 w-4 shrink-0 fill-current" />
+            <Star className="h-4 w-4 shrink-0 fill-current" />
           </div>
         </motion.div>
       </div>
@@ -564,43 +812,63 @@ function ThemeTwoHero({ patientCount }: { patientCount: number }) {
     });
   }, []);
   return (
-    <section className="min-h-screen lg:h-screen flex flex-col lg:overflow-hidden bg-white">
-      <div className="px-5 lg:px-16 pb-8 lg:pb-[82px] flex-1">
-        <div className="grid lg:grid-cols-2 items-stretch gap-8 h-full pt-8">
+    <section className="flex min-h-[100svh] flex-col bg-white lg:h-screen lg:overflow-hidden">
+      <div className="flex-1 px-4 pb-8 pt-6 sm:px-5 lg:px-16 lg:pb-[82px]">
+        <div className="grid h-full items-stretch gap-6 pt-2 sm:gap-8 sm:pt-6 lg:grid-cols-2 lg:gap-8 lg:pt-8">
           <div className="flex flex-col justify-between fade-up">
             <div>
-              <h1 className="font-[var(--font-poppins)] text-[2rem] sm:text-5xl lg:text-[3.5rem] xl:text-7xl leading-[1.08] tracking-tight">
+              <h1 className="font-[var(--font-poppins)] text-[clamp(1.45rem,4.6vw+0.4rem,4.5rem)] leading-[1.08] tracking-tight">
                 Advanced care systems that empower hospitals
               </h1>
-              <div className="pt-6 flex items-center gap-4">
-                <Button>Book Appointment</Button>
-                <a className="underline" href="#contact">Call Now</a>
+              <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:gap-4">
+                <Link
+                  href="#contact"
+                  className={cn(
+                    buttonVariants({ size: "default" }),
+                    "h-12 w-full touch-manipulation justify-center sm:h-11 sm:w-auto"
+                  )}
+                >
+                  Book Appointment
+                </Link>
+                <a
+                  className="flex h-12 items-center justify-center text-center text-sm font-semibold text-zinc-900 underline touch-manipulation sm:h-auto sm:justify-start"
+                  href="tel:+919876543210"
+                >
+                  Call Now
+                </a>
               </div>
             </div>
-            <div className="hidden lg:block text-sm max-w-md text-zinc-700">
+            <p className="mt-6 text-sm leading-relaxed text-zinc-700 lg:mt-0 lg:hidden">
+              Structured workflows for multi-department care with appointment and admin clarity.
+            </p>
+            <div className="hidden text-sm text-zinc-700 lg:block lg:max-w-md">
               Structured workflows for multi-department care with appointment and admin clarity.
             </div>
           </div>
           <div className="flex flex-col gap-4 fade-up [animation-delay:150ms]">
-            <article className="rounded-[1.5rem] lg:rounded-[2.5rem] bg-black p-6 text-white relative overflow-hidden flex-1 min-h-[200px]">
-              <video ref={ref0} autoPlay muted loop playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+            <article className="relative min-h-[180px] flex-1 overflow-hidden rounded-[1.5rem] bg-black p-4 text-white sm:min-h-[200px] sm:p-6 lg:rounded-[2.5rem]">
+              <video ref={ref0} autoPlay muted loop playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover opacity-60" />
               <div className="relative z-10">
-                <h3 className="text-2xl lg:text-3xl">Ready to digitize your hospital operations?</h3>
-                <p className="mt-3 text-white/85">Move from manual coordination to real-time operational control.</p>
+                <h3 className="text-lg font-medium sm:text-2xl lg:text-3xl">
+                  Ready to digitize your hospital operations?
+                </h3>
+                <p className="mt-2 text-sm text-white/85 sm:mt-3">
+                  Move from manual coordination to real-time operational control.
+                </p>
               </div>
             </article>
-            <div className="grid grid-cols-2 gap-3 lg:gap-4 flex-1">
-              <article className="rounded-[1.5rem] lg:rounded-[2.5rem] bg-black p-5 lg:p-8 min-h-[180px] text-white relative overflow-hidden">
-                <video ref={ref1} autoPlay muted loop playsInline preload="auto" className="absolute top-1/2 left-1/2 w-[150%] h-[150%] object-cover -translate-x-1/2 -translate-y-1/2 opacity-50" />
+            <div className="grid flex-1 grid-cols-2 gap-3 lg:gap-4">
+              <article className="relative min-h-[140px] overflow-hidden rounded-[1.5rem] bg-black p-4 text-white sm:min-h-[180px] sm:p-5 lg:rounded-[2.5rem] lg:p-8">
+                <video ref={ref1} autoPlay muted loop playsInline preload="auto" className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-cover opacity-50" />
                 <div className="relative z-10">
-                  <p className="text-sm">multi-department care</p>
+                  <p className="text-xs sm:text-sm">multi-department care</p>
                 </div>
               </article>
-              <article className="rounded-[1.5rem] lg:rounded-[2.5rem] bg-black p-5 lg:p-8 min-h-[180px] text-white relative overflow-hidden">
-                <video ref={ref2} autoPlay muted loop playsInline preload="auto" className="absolute top-1/2 left-1/2 w-[280%] h-[280%] object-cover -translate-x-1/2 -translate-y-1/2 opacity-50" />
+              <article className="relative min-h-[140px] overflow-hidden rounded-[1.5rem] bg-black p-4 text-white sm:min-h-[180px] sm:p-5 lg:rounded-[2.5rem] lg:p-8">
+                <video ref={ref2} autoPlay muted loop playsInline preload="auto" className="absolute left-1/2 top-1/2 h-[280%] w-[280%] -translate-x-1/2 -translate-y-1/2 object-cover opacity-50" />
                 <div className="relative z-10">
-                  <p className="text-5xl font-semibold">{patientCount.toLocaleString()}</p>
-                  <p className="text-sm">patients served</p>
+                  <p className="text-3xl font-semibold sm:text-5xl">{patientCount.toLocaleString()}</p>
+                  <p className="text-xs sm:text-sm">patients served</p>
                 </div>
               </article>
             </div>
@@ -614,21 +882,35 @@ function ThemeTwoHero({ patientCount }: { patientCount: number }) {
 function ThemeThreeHero({
   active,
   onThemeChange,
+  onOpenMobileMenu,
 }: {
   active: Theme;
   onThemeChange: (next: Theme) => void;
+  onOpenMobileMenu: () => void;
 }) {
   return (
     <div className="min-h-screen bg-[rgb(var(--background))]">
-      <div className="px-6 lg:px-8 pt-4">
-        <nav className="max-w-7xl mx-auto bg-[rgb(var(--nav))] rounded-xl shadow-sm px-4 py-4 sm:px-8 sm:py-5 flex flex-wrap items-center justify-between gap-3">
-          <a className="text-2xl font-bold tracking-tight flex items-center gap-3" href="#">
-            <span className="w-7 h-7 rounded-full bg-foreground inline-flex items-center justify-center">
-              <span className="w-3 h-3 bg-white rounded-sm" />
+      <div className="px-4 pt-3 sm:px-6 lg:px-8 lg:pt-4">
+        <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-xl bg-[rgb(var(--nav))] px-3 py-3 shadow-sm sm:px-6 sm:py-4 md:px-8 md:py-5">
+          <a
+            className="flex min-w-0 max-w-[70%] items-center gap-2 text-lg font-bold tracking-tight sm:gap-3 sm:text-2xl"
+            href="#"
+          >
+            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground">
+              <span className="h-3 w-3 rounded-sm bg-white" />
             </span>
-            Smart Hospitals
+            <span className="truncate">Smart Hospitals</span>
           </a>
-          <div className="hidden md:flex gap-6 text-base font-medium text-zinc-800/80">
+          <button
+            type="button"
+            className="inline-flex touch-manipulation items-center justify-center rounded-lg p-2.5 hover:bg-zinc-100 md:hidden"
+            onClick={onOpenMobileMenu}
+            aria-controls="mobile-menu"
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          <div className="hidden gap-6 text-base font-medium text-zinc-800/80 md:flex">
             <a className="inline-flex items-center gap-1 hover:text-foreground" href="#services">
               Services <ChevronDown className="h-3.5 w-3.5" />
             </a>
@@ -639,7 +921,7 @@ function ThemeThreeHero({
               Pricing
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+          <div className="hidden flex-wrap items-center justify-end gap-2 sm:gap-3 md:flex">
             <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-white/80 p-1">
               {(["theme1", "theme2", "theme3"] as const).map((t) => (
                 <Button
@@ -648,7 +930,7 @@ function ThemeThreeHero({
                   size="sm"
                   variant={active === t ? "default" : "outline"}
                   className={cn(
-                    "min-w-9 px-2",
+                    "min-w-9 touch-manipulation px-2",
                     active === t ? "bg-foreground text-background" : ""
                   )}
                   onClick={() => onThemeChange(t)}
@@ -657,35 +939,46 @@ function ThemeThreeHero({
                 </Button>
               ))}
             </div>
-            <a className="hidden sm:inline text-zinc-800/80 hover:text-foreground" href="tel:+919876543210">
+            <a
+              className="hidden text-zinc-800/80 hover:text-foreground sm:inline"
+              href="tel:+919876543210"
+            >
               Call Now
             </a>
-            <Link href="#contact">
-              <Button variant="hero" size="default" type="button">
+            <Link href="#contact" className="shrink-0">
+              <Button variant="hero" size="default" type="button" className="touch-manipulation">
                 Book Appointment
               </Button>
             </Link>
           </div>
         </nav>
       </div>
-      <section className="bg-[rgb(var(--background))] min-h-[calc(100vh-4rem)] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 min-h-[calc(100vh-4rem)] flex items-center w-full relative z-10">
+      <section className="relative min-h-[min(100svh,900px)] overflow-hidden bg-[rgb(var(--background))] lg:min-h-[calc(100vh-4rem)]">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center px-4 py-10 sm:px-6 sm:py-14 lg:min-h-[calc(100vh-4rem)] lg:px-8">
           <div className="max-w-xl">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight leading-[1.05]">
+            <h1 className="text-[clamp(1.85rem,5.5vw+0.5rem,4.5rem)] font-medium leading-[1.08] tracking-tight">
               Simplify hospital operations and patient care
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-[rgb(var(--muted-foreground))] max-w-xl leading-relaxed">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-[rgb(var(--muted-foreground))] sm:mt-6 sm:text-lg md:text-xl">
               Manage appointments, departments, inventory, and prescriptions with one connected hospital system.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="#contact">
-                <Button variant="hero" size="xl" type="button">
+            <div className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:gap-4">
+              <Link href="#contact" className="w-full sm:w-auto">
+                <Button
+                  variant="hero"
+                  size="xl"
+                  type="button"
+                  className="h-12 w-full touch-manipulation sm:h-14 sm:w-auto sm:min-w-[10rem]"
+                >
                   Book Appointment
                 </Button>
               </Link>
               <Link
-                href="#contact"
-                className={cn(buttonVariants({ variant: "hero-outline", size: "xl" }))}
+                href="tel:+919876543210"
+                className={cn(
+                  buttonVariants({ variant: "hero-outline", size: "xl" }),
+                  "h-12 w-full touch-manipulation justify-center sm:h-14 sm:w-auto sm:min-w-[10rem]"
+                )}
               >
                 Call Now
               </Link>
