@@ -1,0 +1,17 @@
+{
+  "name": "Smart Hospitals",
+  "short_name": "Smart Hospitals",
+  "description": "Hospital website, CRM, appointments, inventory, and prescriptions.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
