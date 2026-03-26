@@ -18,6 +18,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type Theme = "theme1" | "theme2" | "theme3";
+const CONTACT_PHONE_E164 = "tel:+919505009699";
+const WHATSAPP_LINK = `https://wa.me/919505009699?text=${encodeURIComponent(
+  "Hello Smart Hospitals, I need details about hospital digital setup."
+)}`;
 
 const themeContent: Record<
   Theme,
@@ -39,7 +43,7 @@ const themeContent: Record<
   }
 > = {
   theme1: {
-    emergency: "Emergency Helpline: +91 98765 43210",
+    emergency: "Emergency Helpline: +91 95050 09699",
     badges: ["NABH-ready workflow", "Local patient discovery", "Trusted by 500+ hospitals"],
     servicesTitle: "Visibility-first Services",
     services: [
@@ -77,7 +81,7 @@ const themeContent: Record<
     footerLine: "Smart Hospitals - Your hospital, now visible to every patient nearby.",
   },
   theme2: {
-    emergency: "Critical Care Line: +91 98765 43210",
+    emergency: "Critical Care Line: +91 95050 09699",
     badges: ["Multi-department ready", "Structured admin control", "Patients served at scale"],
     servicesTitle: "Operations-focused Services",
     services: [
@@ -115,7 +119,7 @@ const themeContent: Record<
     footerLine: "Smart Hospitals - From reception chaos to operational control.",
   },
   theme3: {
-    emergency: "24x7 Care Support: +91 98765 43210",
+    emergency: "24x7 Care Support: +91 95050 09699",
     badges: ["Full hospital OS mindset", "Modern premium experience", "Plan III ready"],
     servicesTitle: "Complete System Services",
     services: [
@@ -257,11 +261,13 @@ function MobileNavDrawer({
             Book Appointment
           </Link>
           <a
-            href="tel:+919876543210"
+            href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-3 flex h-12 items-center justify-center text-sm font-semibold text-zinc-800 touch-manipulation"
             onClick={onClose}
           >
-            Call Now
+            WhatsApp Now
           </a>
         </div>
       </div>
@@ -832,7 +838,7 @@ function ThemeTwoHero({ patientCount }: { patientCount: number }) {
                 </Link>
                 <a
                   className="flex h-12 items-center justify-center text-center text-sm font-semibold text-zinc-900 underline touch-manipulation sm:h-auto sm:justify-start"
-                  href="tel:+919876543210"
+                  href={CONTACT_PHONE_E164}
                 >
                   Call Now
                 </a>
@@ -978,7 +984,7 @@ function ThemeThreeHero({
             </div>
             <a
               className="hidden text-zinc-800/80 hover:text-foreground sm:inline"
-              href="tel:+919876543210"
+              href={CONTACT_PHONE_E164}
             >
               Call Now
             </a>
@@ -1011,7 +1017,7 @@ function ThemeThreeHero({
                 </Button>
               </Link>
               <Link
-                href="tel:+919876543210"
+                href={CONTACT_PHONE_E164}
                 className={cn(
                   buttonVariants({ variant: "hero-outline", size: "xl" }),
                   "h-12 w-full touch-manipulation justify-center sm:h-14 sm:w-auto sm:min-w-[10rem]"
