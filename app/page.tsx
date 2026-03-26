@@ -891,25 +891,62 @@ function ThemeThreeHero({
   return (
     <div className="min-h-screen bg-[rgb(var(--background))]">
       <div className="px-4 pt-3 sm:px-6 lg:px-8 lg:pt-4">
-        <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-xl bg-[rgb(var(--nav))] px-3 py-3 shadow-sm sm:px-6 sm:py-4 md:px-8 md:py-5">
-          <a
-            className="flex min-w-0 max-w-[70%] items-center gap-2 text-lg font-bold tracking-tight sm:gap-3 sm:text-2xl"
-            href="#"
-          >
-            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground">
-              <span className="h-3 w-3 rounded-sm bg-white" />
-            </span>
-            <span className="truncate">Smart Hospitals</span>
-          </a>
-          <button
-            type="button"
-            className="inline-flex touch-manipulation items-center justify-center rounded-lg p-2.5 hover:bg-zinc-100 md:hidden"
-            onClick={onOpenMobileMenu}
-            aria-controls="mobile-menu"
-            aria-label="Open menu"
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+        <nav className="mx-auto flex max-w-7xl flex-col gap-3 rounded-xl bg-[rgb(var(--nav))] px-3 py-3 shadow-sm sm:px-6 sm:py-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-3 md:px-8 md:py-5">
+          <div className="flex w-full items-center justify-between gap-2 md:w-auto md:max-w-none md:flex-1 md:justify-start">
+            <a
+              className="flex min-w-0 max-w-[min(100%,calc(100%-3rem))] items-center gap-2 text-lg font-bold tracking-tight sm:max-w-[70%] sm:gap-3 sm:text-2xl md:max-w-none"
+              href="#"
+            >
+              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground">
+                <span className="h-3 w-3 rounded-sm bg-white" />
+              </span>
+              <span className="truncate">Smart Hospitals</span>
+            </a>
+            <button
+              type="button"
+              className="inline-flex shrink-0 touch-manipulation items-center justify-center rounded-lg p-2.5 hover:bg-zinc-100 md:hidden"
+              onClick={onOpenMobileMenu}
+              aria-controls="mobile-menu"
+              aria-label="Open menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Mobile: theme switcher always visible (desktop keeps pills in the right cluster) */}
+          <div className="w-full space-y-1.5 md:hidden">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                Presentation theme
+              </span>
+              <span className="text-[11px] text-zinc-400">Tap to preview</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 rounded-xl border border-orange-200/70 bg-gradient-to-b from-white to-orange-50/50 p-1.5 shadow-inner">
+              {(["theme1", "theme2", "theme3"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => onThemeChange(t)}
+                  className={cn(
+                    "flex min-h-11 flex-col items-center justify-center rounded-lg px-1 py-1.5 text-center text-xs font-semibold touch-manipulation transition-all sm:text-sm",
+                    active === t
+                      ? "bg-gradient-to-b from-[hsl(24,100%,72%)] to-[hsl(18,98%,53%)] text-white shadow-md ring-2 ring-orange-400/50"
+                      : "border border-zinc-200/80 bg-white text-zinc-800 active:scale-[0.98]"
+                  )}
+                >
+                  <span>{t === "theme1" ? "T1" : t === "theme2" ? "T2" : "T3"}</span>
+                  <span className="mt-0.5 text-[10px] font-normal leading-tight opacity-90">
+                    {t === "theme1"
+                      ? "Editorial"
+                      : t === "theme2"
+                        ? "Enterprise"
+                        : "Premium"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="hidden gap-6 text-base font-medium text-zinc-800/80 md:flex">
             <a className="inline-flex items-center gap-1 hover:text-foreground" href="#services">
               Services <ChevronDown className="h-3.5 w-3.5" />
